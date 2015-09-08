@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!-- INTRODUCTION:
+Author: Veronica Gunn
+Date: Fall 2015
+-->
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Digit Ratio!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script>
+      // JavaScript code for PrimaryColor
+      
+      // Notes
+      // detectVerticalSquash and drawImageIOSFix are functions that may not be necessary, but were critical at the time of writing due to a flaw in the 
+      // iPhone that squished any photos displayed on an HTML5 canvas element. https://github.com/stomita/ios-imagefile-megapixel
+      
+      // detectVerticalSquash is necessary for setting up the canvas on mobile devices according to their screen size and resolution
+      function detectVerticalSquash(img) {
+        
+        var iw = img.naturalWidth, ih = img.naturalHeight;
+        var canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = ih;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        var data = ctx.getImageData(0, 0, 1, ih).data;
+        var sy = 0;
+        var ey = ih;
+        var py = ih;
+        while (py > sy) {
+          var alpha = data[(py - 1) * 4 + 3];
+          if (alpha === 0) 
+            ey = py;
+          else 
+            sy = py;
+          py = (ey + sy) >> 1;
+        }
+        var ratio = (py / ih);
+        return (ratio===0) ? 1 : ratio;
+      }
+      
+      // drawImageIOSFix draws the Canvas on the mobile web page
+      function drawImageIOSFix(ctx, img, sx, sy, sw, sh, dx, dy, dw, dh)
+      {
+        var vertSquashRatio = detectVerticalSquash(img);
+        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh / vertSquashRatio);
+      }
+      
+      // TODO(vfgunn): RESTRUCTURE! Break into pieces for simplicity. 
+      // window.onload is necessary to keep javascript from running before the app gets a chance to load entirely
+      window.onload = function() {
+        var fileInput = document.getElementById('fileInput');
+        var fileDisplayArea = document.getElementById('fileDisplayArea');
+        
+        var canvas = document.getElementById('handCanvas');
+        var context = canvas.getContext('2d');
+        // fileInput.addEventListener looks for any change in the <input> tag indicating that the user has selected a file (picture)
+        fileInput.addEventListener('change', function(e) {
+          
+          var file = fileInput.files[0];
+          var imageType = /image.*/;
+          
+          // Check to make sure that the selected file is an image
+          if (file.type.match(imageType)) {
+            
+            // Create a FileReader object which is necessary to retrieve the image (read the file)
+            var reader = new FileReader();
+            
+            reader.onload = function(e) {
+              
+              // Create a variable to hold an image
+              var img = new Image();
+              
+              // Run this following code when the image is loaded
+              img.onload = function() {
+                
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw the image onto the first drawing canvas. The specific canvas is referred to by context 
+                drawImageIOSFix(context,img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, 600, 500); 
+                
+                // getImageData gets all the pixel information RGBalpha; Parameters:(start x, start y, width, height)
+                var imageInfo = context.getImageData(0,0, 600, 500);
+                
+              } // End of img.onload
+              
+              img.src = reader.result;
+
+              promptForLines();
+            } // End of reader.onload -->
+        
+          reader.readAsDataURL(file);
+          
+          } // End of the if statement checking that file is an image -->
+          // Not image file
+          else 
+            fileDisplayArea.innerHTML = "File not supported!"
+          
+        }); // End of the fileInput.addEventListener
+        
+      } // End of the window.onload function
+
+      var indexBegin;
+      var indexEnd;
+      var thirdBegin;
+      var thirdEnd;
+      function promptForLines() {
+        var instructions = document.getElementById('instructions');
+        instructions.removeChild(instructions.childNodes[0]);
+
+        var prompt = 'Tap the beginning and end of your index finger, then the beginning and end of your third finger (ring finger)';
+        instructions.appendChild(document.createTextNode(prompt));
+
+        $("#handCanvas").on("click", function(e) {
+          if (!indexBegin) {
+            indexBegin = event;
+          } else if (!indexEnd) {
+            indexEnd = event;
+            drawLine(indexBegin, indexEnd);
+          } else if (!thirdBegin) {
+            thirdBegin = event;
+          } else if (!thirdEnd) {
+            thirdEnd = event;
+            drawLine(thirdBegin, thirdEnd);
+          }
+        })
+      }
+
+      function drawLine(begin, end) {
+        var context = document.getElementById('handCanvas').getContext('2d');
+        context.beginPath();
+        context.moveTo(begin.offsetX, begin.offsetY);
+        context.lineTo(end.offsetX, end.offsetY);
+        context.stroke();
+      }
+    
+    </script>
+  </head>
+
+  <body>
+    <h1>Digit Ratio!</h1>
+    <input type="file" id="fileInput">
+    <div id="instructions">Please upload an image!</div>
+    <canvas id="handCanvas" width=600 height=500 style="border:1px solid #d3d3d3;"></canvas>
+  </body>
+</html>
