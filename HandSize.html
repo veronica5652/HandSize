@@ -50,6 +50,7 @@ Date: Fall 2015
         var vertSquashRatio = detectVerticalSquash(img);
         ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh / vertSquashRatio);
       }
+      var img;
       
       // TODO(vfgunn): RESTRUCTURE! Break into pieces for simplicity. 
       // window.onload is necessary to keep javascript from running before the app gets a chance to load entirely
@@ -74,10 +75,15 @@ Date: Fall 2015
             reader.onload = function(e) {
               
               // Create a variable to hold an image
-              var img = new Image();
+              img = new Image();
               
               // Run this following code when the image is loaded
               img.onload = function() {
+
+                hand.indexBegin = null;
+                hand.indexEnd = null;
+                hand.thirdBegin = null;
+                hand.thirdEnd = null;
                 
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 
@@ -102,14 +108,21 @@ Date: Fall 2015
             fileDisplayArea.innerHTML = "File not supported!"
           
         }); // End of the fileInput.addEventListener
+
+        addRelevantListeners();
         
       } // End of the window.onload function
 
-      var indexBegin;
-      var indexEnd;
-      var thirdBegin;
-      var thirdEnd;
+      function addRelevantListeners() {
+        $('#takeAgain').on('click', redrawLines);
+        $('#proceedButton').on('click', proceed);
+      }
+      var hand = new Object();
+
       function promptForLines() {
+        document.getElementById('proceedButton').style.display="none";
+        document.getElementById('takeAgain').style.display="none";
+
         var instructions = document.getElementById('instructions');
         instructions.removeChild(instructions.childNodes[0]);
 
@@ -117,18 +130,58 @@ Date: Fall 2015
         instructions.appendChild(document.createTextNode(prompt));
 
         $("#handCanvas").on("click", function(e) {
-          if (!indexBegin) {
-            indexBegin = event;
-          } else if (!indexEnd) {
-            indexEnd = event;
-            drawLine(indexBegin, indexEnd);
-          } else if (!thirdBegin) {
-            thirdBegin = event;
-          } else if (!thirdEnd) {
-            thirdEnd = event;
-            drawLine(thirdBegin, thirdEnd);
+          if (!hand.indexBegin) {
+            hand.indexBegin = event;
+          } else if (!hand.indexEnd) {
+            hand.indexEnd = event;
+            drawLine(hand.indexBegin, hand.indexEnd);
+          } else if (!hand.thirdBegin) {
+            hand.thirdBegin = event;
+          } else if (!hand.thirdEnd) {
+            hand.thirdEnd = event;
+            drawLine(hand.thirdBegin, hand.thirdEnd);
+            $("#handCanvas").off("click");
+            addResetButton();
           }
-        })
+        });
+      }
+
+      function redrawLines() {
+        drawImageIOSFix(document.getElementById('handCanvas').getContext('2d'), img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, 600, 500); 
+
+        document.getElementById('instructions').removeChild(document.getElementById('instructions').childNodes[0]);
+        document.getElementById('instructions').appendChild(document.createTextNode('Tap the beginning and end of your index finger, then the beginning and end of your third finger (ring finger)'));
+        document.getElementById('takeAgain').style.display = 'hidden';
+        document.getElementById('proceedButton').style.display = 'hidden';
+        hand.indexBegin = null;
+        hand.indexEnd = null;
+        hand.thirdBegin = null;
+        hand.thirdEnd = null;
+
+        promptForLines();
+      }
+
+      function addResetButton() {
+        document.getElementById('instructions').removeChild(document.getElementById('instructions').childNodes[0]);
+        document.getElementById('instructions').appendChild(document.createTextNode('Do these lines look ok?'));
+        document.getElementById('takeAgain').style.display = 'initial';
+
+        document.getElementById('proceedButton').style.display = 'initial';
+      }
+
+      function proceed() {
+        xDistanceIndex = Math.pow(hand.indexBegin.offsetX - hand.indexEnd.offsetX, 2);
+        yDistanceIndex = Math.pow(hand.indexBegin.offsetY - hand.indexEnd.offsetY, 2);
+
+        var indexLength = Math.sqrt(xDistanceIndex + yDistanceIndex);
+
+        xDistanceIndex = Math.pow(hand.thirdBegin.offsetX - hand.thirdEnd.offsetX, 2);
+        yDistanceIndex = Math.pow(hand.thirdBegin.offsetY - hand.thirdEnd.offsetY, 2);
+
+        var ringLength = Math.sqrt(xDistanceIndex + yDistanceIndex);
+
+        var ratio = indexLength / ringLength;
+        alert(ratio);
       }
 
       function drawLine(begin, end) {
@@ -147,5 +200,7 @@ Date: Fall 2015
     <input type="file" id="fileInput">
     <div id="instructions">Please upload an image!</div>
     <canvas id="handCanvas" width=600 height=500 style="border:1px solid #d3d3d3;"></canvas>
+    <button type="button" id="proceedButton" style="display: none;">Looks Good!</button>
+    <button type="button" id="takeAgain" style="display: none;">Redraw Lines</button>
   </body>
 </html>
