@@ -181,7 +181,25 @@ Date: Fall 2015
         var ringLength = Math.sqrt(xDistanceIndex + yDistanceIndex);
 
         var ratio = indexLength / ringLength;
-        alert(ratio);
+        alert(ratio + " " + getResult(ratio));
+      }
+
+      function getResult(ratio) {
+        if (ratio >= .975) {
+          return "Males with this 2D:4D ratio who display aggressive behavior are considered " +
+                  "outliers. It is unusual for a male with this 2D:4D ratio to display aggressive " +
+                  "behavior.";
+        } else if (ratio >= .97) {
+          return "Males with this 2D:4D ratio are are less likely to display aggressive behavior";
+        } else if (ratio >= .94) {
+          return "Males with this 2D:4D ratio tend to be equally likely to display aggressive or non-aggressive behavior.";
+        } else if (ratio >= .925) {
+          return "Males with this 2D:4D ratio tend to display more aggressive behavior.";
+        } else {
+          return "Males with this 2D:4D ratio who do not display aggresive behavior are considered " +
+                  "outliers. It is usual for a male with this 2D:4D ratio to display aggressive " +
+                  "behavior.";
+        }
       }
 
       function drawLine(begin, end) {
