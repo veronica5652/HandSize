@@ -60,6 +60,9 @@ Date: Fall 2015
         
         var canvas = document.getElementById('handCanvas');
         var context = canvas.getContext('2d');
+
+        canvas.height = window.innerWidth;
+        canvas.width = window.innerHeight * .8;
         // fileInput.addEventListener looks for any change in the <input> tag indicating that the user has selected a file (picture)
         fileInput.addEventListener('change', function(e) {
           
@@ -85,13 +88,27 @@ Date: Fall 2015
                 hand.thirdBegin = null;
                 hand.thirdEnd = null;
                 
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                
+                context.clearRect(0, 0, canvas.height, canvas.height);
+
+                var scaledHeight = img.naturalHeight;
+                var scaledWidth = img.naturalWidth;
+                var ratio;
+                if (scaledHeight > scaledWidth) {
+                  ratio = canvas.height / scaledHeight;
+                } else {
+                  ratio = canvas.height / scaledWidth;
+                }
+
+                scaledHeight *= ratio;
+                scaledWidth *= ratio;
+
+                canvas.width = scaledWidth;
+                canvas.height = scaledHeight;
                 // Draw the image onto the first drawing canvas. The specific canvas is referred to by context 
-                drawImageIOSFix(context,img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, 600, 500); 
+                drawImageIOSFix(context,img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, scaledHeight, scaledWidth); 
                 
                 // getImageData gets all the pixel information RGBalpha; Parameters:(start x, start y, width, height)
-                var imageInfo = context.getImageData(0,0, 600, 500);
+                var imageInfo = context.getImageData(0,0, canvas.width, canvas.height);
                 
               } // End of img.onload
               
