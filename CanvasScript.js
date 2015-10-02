@@ -2,14 +2,61 @@ var setUp = function() {
 	setUpFileUpload();
 }
 
-var createCanvasAndDrawImage = function() {
-	alert("Called create canvas!");
+/*
+ * Creates the canvas and draws the scaled image.
+ */
+var createCanvasAndDrawImage = function(image) {
+	var dynamicDiv = $('<div/>', {id: 'dynamicContent'});
+	$('#pageContent').append(dynamicDiv);
+
+	var imageWidth = image.naturalWidth;
+	var imageHeight = image.naturalHeight;
+
+	var windowWidth = window.innerWidth * .8;
+	var windowHeight = window.innerHeight * .8;
+	
+	var scaleFactor = calculateScaleFactor(imageWidth, imageHeight, windowWidth, windowHeight);
+	imageWidth /= scaleFactor;
+	imageHeight /= scaleFactor;
+	var canvas = $('<canvas/>', { id: 'canvas'});
+	canvas.css('border', 'solid 1px black');
+	$('#dynamicContent').append(canvas); 
+
+	canvas = document.getElementById('canvas');
+	canvas.width = imageWidth;
+	canvas.height = imageHeight;
+	var context = canvas.getContext('2d');
+	context.drawImage(image, 0, 0, imageWidth, imageHeight);
+}
+
+/*
+ * This function calculates the scale factor for the image. It tries first to choose
+ * based on screen ratio, then if that doesn't work it chooses based on image
+ * ratio
+ */
+var calculateScaleFactor = function(imageWidth, imageHeight, windowWidth, windowHeight) {
+	if (windowHeight >= windowWidth) {
+		var scale = imageWidth / windowWidth;
+		if (imageHeight / scale > windowHeight) {
+			scale = imageHeight / windowHeight;
+		}
+	} else {
+		var scale = imageHeight / windowHeight;
+		if (imageWidth / scale > windowWidth) {
+			scale = imageWidth / windowWidth;
+		}
+	}
+	return scale;
 }
 
 var loadImage = function(fileReader) {
 	var image = new Image();
 	image.src = fileReader.result;
-	$(image).load(createCanvasAndDrawImage);
+	$(image).load(createCanvasAndDrawImage(image));
+}
+
+var clearCurrentPage = function() {
+	$('#dynamicContent').remove();
 }
 
 /*
@@ -19,6 +66,7 @@ var loadImage = function(fileReader) {
  * TODO(vfgunn): Finish implementation
  */
 var handleUpload = function(fileInput) {
+	clearCurrentPage();
 	var file = fileInput.files[0];
 	if (!isValidImage(file)) {
 		return;
