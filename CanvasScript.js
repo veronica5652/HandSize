@@ -1,14 +1,28 @@
+var originalImage;
+
 var setUp = function() {
 	setUpFileUpload();
 }
 
 /*
- * Creates the canvas and draws the scaled image.
+ * Creates the dynamic content div, the canvas, and draws the original image.
  */
 var createCanvasAndDrawImage = function(image) {
 	var dynamicDiv = $('<div/>', {id: 'dynamicContent'});
 	$('#pageContent').append(dynamicDiv);
 
+	
+	var canvas = $('<canvas/>', { id: 'canvas'});
+	canvas.css('border', 'solid 1px black');
+	$('#dynamicContent').append(canvas); 
+
+	drawImage(image);
+}
+
+/*
+ * Determines a scale factor and draws the image
+ */
+var drawImage = function(image) {
 	var imageWidth = image.naturalWidth;
 	var imageHeight = image.naturalHeight;
 
@@ -18,10 +32,6 @@ var createCanvasAndDrawImage = function(image) {
 	var scaleFactor = calculateScaleFactor(imageWidth, imageHeight, windowWidth, windowHeight);
 	imageWidth /= scaleFactor;
 	imageHeight /= scaleFactor;
-	var canvas = $('<canvas/>', { id: 'canvas'});
-	canvas.css('border', 'solid 1px black');
-	$('#dynamicContent').append(canvas); 
-
 	canvas = document.getElementById('canvas');
 	canvas.width = imageWidth;
 	canvas.height = imageHeight;
@@ -52,6 +62,7 @@ var calculateScaleFactor = function(imageWidth, imageHeight, windowWidth, window
 var loadImage = function(fileReader) {
 	var image = new Image();
 	image.src = fileReader.result;
+	originalImage = image;
 	$(image).load(createCanvasAndDrawImage(image));
 }
 
@@ -63,7 +74,6 @@ var clearCurrentPage = function() {
  * This function validates that a given file is a valid image
  * and then creates a new canvas and draws the image on the
  * canvas.
- * TODO(vfgunn): Finish implementation
  */
 var handleUpload = function(fileInput) {
 	clearCurrentPage();
