@@ -1,7 +1,59 @@
 var originalImage;
+var originalScaleFactor;
+
+var ZOOM_FACTOR = 2.0;
 
 var setUp = function() {
 	setUpFileUpload();
+}
+
+var setUpZoomCanvas = function(image) {
+	var canvas = $('<canvas/>', { id : 'zoomCanvas'});
+	canvas.css('border', 'solid 1px black');
+	$('#dynamicContent').append(canvas);
+
+	var originalCanvas = document.getElementById('canvas');
+	var zoomCanvas = document.getElementById('zoomCanvas');
+
+	zoomCanvas.height = originalCanvas.height;
+	zoomCanvas.width = originalCanvas.width;
+
+	$('#canvas').on('click', drawZoomImage);
+}
+
+/*
+ * Renders an image zoomed by ZOOM_FACTOR
+ * e is the event associated with the click, which represents
+ * the center of the new zoomed image.
+ * If the point clicked would caused zooming to have empty parts
+ * of the canvas, the point clicked is readjusted.
+ */
+var drawZoomImage = function(e) {
+
+	var zoomCanvas = document.getElementById('zoomCanvas');
+	var xCoord = e.offsetX;
+	var yCoord = e.offsetY;
+	xCoord = xCoord * originalScaleFactor * ZOOM_FACTOR;
+	yCoord = yCoord * originalScaleFactor * ZOOM_FACTOR;
+	var xCorner = xCoord - (zoomCanvas.width * .5);
+	var yCorner = yCoord - (zoomCanvas.height * .5);
+	xCorner /= ZOOM_FACTOR;
+	yCorner /= ZOOM_FACTOR;
+	xCorner = Math.max(xCorner, 0);
+	yCorner = Math.max(yCorner, 0);
+
+	var maxX = ((zoomCanvas.width * originalScaleFactor * ZOOM_FACTOR) - (zoomCanvas.width )) / ZOOM_FACTOR;
+	var maxY = ((zoomCanvas.height * originalScaleFactor * ZOOM_FACTOR) - (zoomCanvas.height)) / ZOOM_FACTOR;
+
+	xCorner = Math.min(xCorner, maxX);
+	yCorner = Math.min(yCorner, maxY);
+	
+	var newXHeight = originalImage.naturalWidth / originalScaleFactor * ZOOM_FACTOR;
+	var newYHeight = originalImage.naturalHeight / originalScaleFactor * ZOOM_FACTOR;
+
+	var context = zoomCanvas.getContext('2d');
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.drawImage(originalImage, xCorner, yCorner, canvas.width, canvas.height, 0, 0, newXHeight, newYHeight);
 }
 
 /*
@@ -16,20 +68,23 @@ var createCanvasAndDrawImage = function(image) {
 	canvas.css('border', 'solid 1px black');
 	$('#dynamicContent').append(canvas); 
 
-	drawImage(image);
+	drawFullSizeImage(image);
+
+	setUpZoomCanvas();
 }
 
 /*
  * Determines a scale factor and draws the image
  */
-var drawImage = function(image) {
+var drawFullSizeImage = function(image) {
 	var imageWidth = image.naturalWidth;
 	var imageHeight = image.naturalHeight;
 
-	var windowWidth = window.innerWidth * .8;
-	var windowHeight = window.innerHeight * .8;
+	var windowWidth = window.innerWidth * .9;
+	var windowHeight = window.innerHeight * .5;
 	
 	var scaleFactor = calculateScaleFactor(imageWidth, imageHeight, windowWidth, windowHeight);
+	originalScaleFactor = scaleFactor;
 	imageWidth /= scaleFactor;
 	imageHeight /= scaleFactor;
 	canvas = document.getElementById('canvas');
@@ -78,7 +133,7 @@ var clearCurrentPage = function() {
 var handleUpload = function(fileInput) {
 	clearCurrentPage();
 	var file = fileInput.files[0];
-	if (!isValidImage(file)) {
+	if (!file || !isValidImage(file)) {
 		return;
 	}
 	var fileReader = new FileReader();
