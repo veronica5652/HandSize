@@ -8,6 +8,8 @@ var setUp = function() {
 }
 
 var setUpZoomCanvas = function(image) {
+	makeZoomOptions();
+
 	var canvas = $('<canvas/>', { id : 'zoomCanvas'});
 	canvas.css('border', 'solid 1px black');
 	$('#dynamicContent').append(canvas);
@@ -19,6 +21,21 @@ var setUpZoomCanvas = function(image) {
 	zoomCanvas.width = originalCanvas.width;
 
 	$('#canvas').on('click', drawZoomImage);
+}
+
+/*
+ * Creates radio buttons with the available zoom options.
+ */
+var makeZoomOptions = function() {
+	$('#dynamicContent').append('<form id=\"zoomForm\"></form>');
+	$('#zoomForm').append('<fieldset data-role=\"controlgroup\" data-type=\"horizontal\" data-mini=\"true\" id=\"fSet\"></fieldset>');
+	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"twoOption\" value=\"2.0\" checked=\"checked\">');
+	$('#fSet').append('<label for=\"twoOption\">x2</label>');
+	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"fiveOption\" value=\"5.0\">');
+	$('#fSet').append('<label for=\"fiveOption\">x5</label>');
+	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"tenOption\" value=\"10.0\">');
+	$('#fSet').append('<label for=\"tenOption\">x10</label>');
+	$('#zoomForm').trigger('create');
 }
 
 /*
