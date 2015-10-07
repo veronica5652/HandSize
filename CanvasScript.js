@@ -55,7 +55,6 @@ var addPoint = function(e) {
 	var yCoord = upperY + (e.offsetY / ZOOM_FACTOR);
 	e.offsetY = yCoord / originalScaleFactor;
 
-	alert(e.offsetX + " " + e.offsetY);
 	points.push(e);
 	drawPoint(e);
 }
@@ -196,7 +195,7 @@ var drawFullSizeImage = function(image) {
 	var imageHeight = image.naturalHeight;
 
 	var windowWidth = window.innerWidth * .9;
-	var windowHeight = window.innerHeight * .5;
+	var windowHeight = window.innerHeight * .4;
 	
 	var scaleFactor = calculateScaleFactor(imageWidth, imageHeight, windowWidth, windowHeight);
 	originalScaleFactor = scaleFactor;
@@ -234,6 +233,7 @@ var loadImage = function(fileReader) {
 	image.src = fileReader.result;
 	originalImage = image;
 	click = null;
+	points = new Array(null);
 	ZOOM_FACTOR = 2.0;
 	$(image).load(createCanvasAndDrawImage(image));
 }
