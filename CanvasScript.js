@@ -3,12 +3,77 @@ var originalScaleFactor;
 
 var click;
 
+var upperX;
+var upperY;
+
+var points = new Array(null);
+
 var ZOOM_FACTOR = 2.0;
 
 var setUp = function() {
 	setUpFileUpload();
 }
 
+/* TODO(vfgunn): Add actual results here when
+ * you figure out what's actually going on.
+ */
+var calculateResult = function() {
+	alert('Add results here');
+}
+
+/*
+ * Adds another null element to the array 
+ * to indicate that this is the first chance
+ * for a given point.
+ */
+var continueToNextPhase = function() {
+	if (points.length == 4) {
+		calculateResult();
+	} 
+	points.push(null);
+}
+
+/*
+ * Begins by checking to see if the image needs to be redrawn with new
+ * points (a new point was clicked that replaces an old point).
+ * Then adds the new point to the original canvas.
+ */
+var addPoint = function(e) {
+	var lastPoint = points[points.length - 1];
+	points.splice(points.length - 1, 1);
+	if (lastPoint) {
+		drawFullSizeImage(originalImage);
+		drawZoomImage(click);
+		for (var a = 0; a < points.length; a++) {
+			drawPoint(points[a]);
+		}
+	}
+
+	var xCoord = upperX + (e.offsetX / ZOOM_FACTOR);
+	e.offsetX = xCoord / originalScaleFactor;
+
+	var yCoord = upperY + (e.offsetY / ZOOM_FACTOR);
+	e.offsetY = yCoord / originalScaleFactor;
+
+	alert(e.offsetX + " " + e.offsetY);
+	points.push(e);
+	drawPoint(e);
+}
+
+/*
+ * Draws a point centered at the coordinates stored in with a radius of 4
+ */
+var drawPoint = function(e) {
+	var context = document.getElementById('canvas').getContext('2d');
+
+	context.beginPath();
+	context.arc(e.offsetX, e.offsetY, 4, 0, 2 * Math.PI, false);
+	context.fill();
+}
+
+/*
+ * Sets up the canvas that will hold the zoomed in image
+ */
 var setUpZoomCanvas = function(image) {
 	makeZoomOptions();
 
@@ -23,6 +88,11 @@ var setUpZoomCanvas = function(image) {
 	zoomCanvas.width = originalCanvas.width;
 
 	$('#canvas').on('click', drawZoomImage);
+
+	$('#dynamicContent').append('<button type=\"button\" id=\"continueButton\">Continue</button>');
+	$('#continueButton').on('click', continueToNextPhase);
+
+	$('#zoomCanvas').on('click', addPoint);
 }
 
 /*
@@ -92,6 +162,9 @@ var drawZoomImage = function(e) {
 	
 	var newXHeight = originalImage.naturalWidth / originalScaleFactor * ZOOM_FACTOR;
 	var newYHeight = originalImage.naturalHeight / originalScaleFactor * ZOOM_FACTOR;
+
+	upperX = xCorner;
+	upperY = yCorner;
 
 	var context = zoomCanvas.getContext('2d');
 	context.clearRect(0, 0, canvas.width, canvas.height);
