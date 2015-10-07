@@ -1,6 +1,8 @@
 var originalImage;
 var originalScaleFactor;
 
+var click;
+
 var ZOOM_FACTOR = 2.0;
 
 var setUp = function() {
@@ -24,18 +26,39 @@ var setUpZoomCanvas = function(image) {
 }
 
 /*
- * Creates radio buttons with the available zoom options.
+ * Creates radio buttons with the available zoom options and sets up listeners for each one.
  */
 var makeZoomOptions = function() {
 	$('#dynamicContent').append('<form id=\"zoomForm\"></form>');
 	$('#zoomForm').append('<fieldset data-role=\"controlgroup\" data-type=\"horizontal\" data-mini=\"true\" id=\"fSet\"></fieldset>');
-	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"twoOption\" value=\"2.0\" checked=\"checked\">');
+	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"twoOption\" checked=\"checked\">');
 	$('#fSet').append('<label for=\"twoOption\">x2</label>');
-	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"fiveOption\" value=\"5.0\">');
+	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"fiveOption\">');
 	$('#fSet').append('<label for=\"fiveOption\">x5</label>');
-	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"tenOption\" value=\"10.0\">');
+	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"tenOption\">');
 	$('#fSet').append('<label for=\"tenOption\">x10</label>');
 	$('#zoomForm').trigger('create');
+
+	$('#twoOption').change(function() {
+		ZOOM_FACTOR = 2.0;
+		if (click) {
+			drawZoomImage(click);
+		}
+	});
+
+	$('#fiveOption').change(function() {
+		ZOOM_FACTOR = 5.0
+		if (click) {
+			drawZoomImage(click);
+		}
+	});
+
+	$('#tenOption').change(function() {
+		ZOOM_FACTOR = 10.0;
+		if (click) {
+			drawZoomImage(click);
+		}
+	})
 }
 
 /*
@@ -46,6 +69,8 @@ var makeZoomOptions = function() {
  * of the canvas, the point clicked is readjusted.
  */
 var drawZoomImage = function(e) {
+
+	click = e;
 
 	var zoomCanvas = document.getElementById('zoomCanvas');
 	var xCoord = e.offsetX;
@@ -135,6 +160,8 @@ var loadImage = function(fileReader) {
 	var image = new Image();
 	image.src = fileReader.result;
 	originalImage = image;
+	click = null;
+	ZOOM_FACTOR = 2.0;
 	$(image).load(createCanvasAndDrawImage(image));
 }
 
