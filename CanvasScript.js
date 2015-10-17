@@ -173,16 +173,15 @@ var drawZoomImage = function(e) {
 /*
  * Creates the dynamic content div, the canvas, and draws the original image.
  */
-var createCanvasAndDrawImage = function(image) {
+var createCanvasAndDrawImage = function() {
 	var dynamicDiv = $('<div/>', {id: 'dynamicContent'});
 	$('#pageContent').append(dynamicDiv);
 
 	
 	var canvas = $('<canvas/>', { id: 'canvas'});
 	canvas.css('border', 'solid 1px black');
-	$('#dynamicContent').append(canvas); 
-
-	drawFullSizeImage(image);
+	$('#dynamicContent').append(canvas);
+	drawFullSizeImage(originalImage);
 
 	setUpZoomCanvas();
 }
@@ -231,11 +230,13 @@ var calculateScaleFactor = function(imageWidth, imageHeight, windowWidth, window
 var loadImage = function(fileReader) {
 	var image = new Image();
 	image.src = fileReader.result;
+	if (originalImage)
+		$(originalImage).off('load');
 	originalImage = image;
 	click = null;
 	points = new Array(null);
 	ZOOM_FACTOR = 2.0;
-	$(image).load(createCanvasAndDrawImage(image));
+	$(originalImage).load(createCanvasAndDrawImage);
 }
 
 var clearCurrentPage = function() {
@@ -261,6 +262,7 @@ var handleUpload = function(fileInput) {
 	$(fileReader).off("load");
 	$(fileReader).load(function() {
 		loadImage(fileReader);
+		$(fileReader).off('load');
 	});
 }
 
