@@ -8,7 +8,7 @@ var upperY;
 
 var points = new Array(null);
 
-var ZOOM_FACTOR = 2.0;
+var ZOOM_FACTOR = 1.00;
 
 var setUp = function() {
 	setUpFileUpload();
@@ -27,6 +27,10 @@ var calculateResult = function() {
  * for a given point.
  */
 var continueToNextPhase = function() {
+	if (!points[points.length - 1]) {
+		alert("Please select a point before moving on.");
+		return;
+	}
 	if (points.length == 4) {
 		calculateResult();
 	} 
@@ -42,18 +46,16 @@ var addPoint = function(e) {
 	var lastPoint = points[points.length - 1];
 	points.splice(points.length - 1, 1);
 	if (lastPoint) {
-		drawFullSizeImage(originalImage);
+		drawFullSizeImage(originalImage, document.getElementById('canvas'));
 		drawZoomImage(click);
 		for (var a = 0; a < points.length; a++) {
 			drawPoint(points[a]);
 		}
 	}
 
-	var xCoord = upperX + (e.offsetX / ZOOM_FACTOR);
-	e.offsetX = xCoord / originalScaleFactor;
+	e.offsetX = upperX + (e.offsetX / ZOOM_FACTOR);
 
-	var yCoord = upperY + (e.offsetY / ZOOM_FACTOR);
-	e.offsetY = yCoord / originalScaleFactor;
+	e.offsetY = upperY + (e.offsetY / ZOOM_FACTOR);
 
 	points.push(e);
 	drawPoint(e);
@@ -63,6 +65,7 @@ var addPoint = function(e) {
  * Draws a point centered at the coordinates stored in with a radius of 4
  */
 var drawPoint = function(e) {
+	alert(e.offsetX + " " + e.offsetY);
 	var context = document.getElementById('canvas').getContext('2d');
 
 	context.beginPath();
@@ -91,6 +94,7 @@ var setUpZoomCanvas = function(image) {
 	$('#dynamicContent').append('<button type=\"button\" id=\"continueButton\">Continue</button>');
 	$('#continueButton').on('click', continueToNextPhase);
 
+	zoomCanvas.getContext('2d').save();
 	$('#zoomCanvas').on('click', addPoint);
 }
 
@@ -98,36 +102,15 @@ var setUpZoomCanvas = function(image) {
  * Creates radio buttons with the available zoom options and sets up listeners for each one.
  */
 var makeZoomOptions = function() {
-	$('#dynamicContent').append('<form id=\"zoomForm\"></form>');
-	$('#zoomForm').append('<fieldset data-role=\"controlgroup\" data-type=\"horizontal\" data-mini=\"true\" id=\"fSet\"></fieldset>');
-	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"twoOption\" checked=\"checked\">');
-	$('#fSet').append('<label for=\"twoOption\">x2</label>');
-	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"fiveOption\">');
-	$('#fSet').append('<label for=\"fiveOption\">x5</label>');
-	$('#fSet').append('<input type=\"radio\" name=\"zoomOptions\" id=\"tenOption\">');
-	$('#fSet').append('<label for=\"tenOption\">x10</label>');
-	$('#zoomForm').trigger('create');
-
-	$('#twoOption').change(function() {
-		ZOOM_FACTOR = 2.0;
+	$('#dynamicContent').append('<br>');
+	$('#dynamicContent').append('<input type=\"range\" name=\"slider-fill\" id=\"slider-fill\" step=\".1\" value=\"1.0\" min=\"1.0\" max=\"10.0\" data-highlight=\"true\">');
+	$('#slider-fill').change(function() {
+		ZOOM_FACTOR = document.getElementById('slider-fill').value;
 		if (click) {
 			drawZoomImage(click);
 		}
 	});
-
-	$('#fiveOption').change(function() {
-		ZOOM_FACTOR = 5.0
-		if (click) {
-			drawZoomImage(click);
-		}
-	});
-
-	$('#tenOption').change(function() {
-		ZOOM_FACTOR = 10.0;
-		if (click) {
-			drawZoomImage(click);
-		}
-	})
+	$('#dynamicContent').append('<br>');
 }
 
 /*
@@ -138,36 +121,30 @@ var makeZoomOptions = function() {
  * of the canvas, the point clicked is readjusted.
  */
 var drawZoomImage = function(e) {
-
 	click = e;
-
-	var zoomCanvas = document.getElementById('zoomCanvas');
-	var xCoord = e.offsetX;
-	var yCoord = e.offsetY;
-	xCoord = xCoord * originalScaleFactor * ZOOM_FACTOR;
-	yCoord = yCoord * originalScaleFactor * ZOOM_FACTOR;
-	var xCorner = xCoord - (zoomCanvas.width * .5);
-	var yCorner = yCoord - (zoomCanvas.height * .5);
-	xCorner /= ZOOM_FACTOR;
-	yCorner /= ZOOM_FACTOR;
-	xCorner = Math.max(xCorner, 0);
-	yCorner = Math.max(yCorner, 0);
-
-	var maxX = ((zoomCanvas.width * originalScaleFactor * ZOOM_FACTOR) - (zoomCanvas.width )) / ZOOM_FACTOR;
-	var maxY = ((zoomCanvas.height * originalScaleFactor * ZOOM_FACTOR) - (zoomCanvas.height)) / ZOOM_FACTOR;
-
-	xCorner = Math.min(xCorner, maxX);
-	yCorner = Math.min(yCorner, maxY);
-	
-	var newXHeight = originalImage.naturalWidth / originalScaleFactor * ZOOM_FACTOR;
-	var newYHeight = originalImage.naturalHeight / originalScaleFactor * ZOOM_FACTOR;
-
-	upperX = xCorner;
-	upperY = yCorner;
-
 	var context = zoomCanvas.getContext('2d');
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	context.drawImage(originalImage, xCorner, yCorner, canvas.width, canvas.height, 0, 0, newXHeight, newYHeight);
+	context.restore();
+	context.save();
+
+	context.save();
+	var x = e.offsetX * originalScaleFactor - (canvas.width / 2 * originalScaleFactor / ZOOM_FACTOR);
+	var y = e.offsetY * originalScaleFactor - (canvas.height / 2 * originalScaleFactor / ZOOM_FACTOR);
+
+	x = Math.max(x, 0);
+	y = Math.max(y, 0);
+
+	var xMax = canvas.width * originalScaleFactor - (canvas.width * originalScaleFactor / ZOOM_FACTOR);
+	var yMax = canvas.height * originalScaleFactor - (canvas.height * originalScaleFactor / ZOOM_FACTOR);
+
+	x = Math.min(x, xMax);
+	y = Math.min(y, yMax);
+
+	upperX = x / originalScaleFactor;
+	upperY = y / originalScaleFactor;
+
+	context.drawImage(originalImage, x, y, canvas.width * originalScaleFactor / ZOOM_FACTOR, canvas.height * originalScaleFactor / ZOOM_FACTOR, 0, 0, canvas.width, canvas.height);
+	context.restore();
 }
 
 /*
@@ -181,7 +158,7 @@ var createCanvasAndDrawImage = function() {
 	var canvas = $('<canvas/>', { id: 'canvas'});
 	canvas.css('border', 'solid 1px black');
 	$('#dynamicContent').append(canvas);
-	drawFullSizeImage(originalImage);
+	drawFullSizeImage(originalImage, document.getElementById('canvas'));
 
 	setUpZoomCanvas();
 }
@@ -189,7 +166,7 @@ var createCanvasAndDrawImage = function() {
 /*
  * Determines a scale factor and draws the image
  */
-var drawFullSizeImage = function(image) {
+var drawFullSizeImage = function(image, canvas) {
 	var imageWidth = image.naturalWidth;
 	var imageHeight = image.naturalHeight;
 
@@ -200,7 +177,6 @@ var drawFullSizeImage = function(image) {
 	originalScaleFactor = scaleFactor;
 	imageWidth /= scaleFactor;
 	imageHeight /= scaleFactor;
-	canvas = document.getElementById('canvas');
 	canvas.width = imageWidth;
 	canvas.height = imageHeight;
 	var context = canvas.getContext('2d');
@@ -235,7 +211,6 @@ var loadImage = function(fileReader) {
 	originalImage = image;
 	click = null;
 	points = new Array(null);
-	ZOOM_FACTOR = 2.0;
 	$(originalImage).load(createCanvasAndDrawImage);
 }
 
