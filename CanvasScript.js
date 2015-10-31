@@ -34,9 +34,7 @@ var displayResults = function(ratio) {
 		thisDiv = document.getElementById(studies[a].name);
 		ratio = .964758;
 		thisDiv.innerHTML = studies[a].getDisplayString(ratio);
-		alert(thisDiv.innerHTML);
 	}
-	//document.createTextNode(studies[a].getDisplayString())
 }
 
 /*
