@@ -8,17 +8,35 @@ var upperY;
 
 var points = new Array(null);
 
-var ZOOM_FACTOR = 1.00;
+var ZOOM_FACTOR = 2.00;
 
 var setUp = function() {
 	setUpFileUpload();
 }
 
-/* TODO(vfgunn): Add actual results here when
- * you figure out what's actually going on.
- */
 var calculateResult = function() {
-	alert('Add results here');
+	var secondDigit = Math.pow(points[0].offsetX - points[1].offsetX, 2) + Math.pow(points[0].offsetY - points[1].offsetY, 2);
+ 	secondDigit = Math.sqrt(secondDigit);
+
+	var fourthDigit = Math.pow(points[2].offsetX - points[3].offsetX, 2) + Math.pow(points[2].offsetY - points[3].offsetY, 2);
+ 	fourthDigit = Math.sqrt(fourthDigit); 	
+ 	displayResults(secondDigit / fourthDigit);
+}
+
+var displayResults = function(ratio) {
+	clearCurrentPage();
+	var dynamicDiv = $('<div/>', {id: 'dynamicContent'});
+	$('#pageContent').append(dynamicDiv);
+
+	for (var a = 0; a < studies.length; a++) {
+		var thisDiv = $('<div/>', {id: studies[a].name});
+		$('#dynamicContent').append(thisDiv);
+		thisDiv = document.getElementById(studies[a].name);
+		ratio = .964758;
+		thisDiv.innerHTML = studies[a].getDisplayString(ratio);
+		alert(thisDiv.innerHTML);
+	}
+	//document.createTextNode(studies[a].getDisplayString())
 }
 
 /*
@@ -65,7 +83,6 @@ var addPoint = function(e) {
  * Draws a point centered at the coordinates stored in with a radius of 4
  */
 var drawPoint = function(e) {
-	alert(e.offsetX + " " + e.offsetY);
 	var context = document.getElementById('canvas').getContext('2d');
 
 	context.beginPath();
@@ -103,7 +120,7 @@ var setUpZoomCanvas = function(image) {
  */
 var makeZoomOptions = function() {
 	$('#dynamicContent').append('<br>');
-	$('#dynamicContent').append('<input type=\"range\" name=\"slider-fill\" id=\"slider-fill\" step=\".1\" value=\"1.0\" min=\"1.0\" max=\"10.0\" data-highlight=\"true\">');
+	$('#dynamicContent').append('<input type=\"range\" name=\"slider-fill\" id=\"slider-fill\" step=\".1\" value=\"2.0\" min=\"1.0\" max=\"10.0\" data-highlight=\"true\">');
 	$('#slider-fill').change(function() {
 		ZOOM_FACTOR = document.getElementById('slider-fill').value;
 		if (click) {
