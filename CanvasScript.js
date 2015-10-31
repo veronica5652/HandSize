@@ -32,7 +32,6 @@ var displayResults = function(ratio) {
 		var thisDiv = $('<div/>', {id: studies[a].name});
 		$('#dynamicContent').append(thisDiv);
 		thisDiv = document.getElementById(studies[a].name);
-		ratio = .964758;
 		thisDiv.innerHTML = studies[a].getDisplayString(ratio);
 	}
 }
