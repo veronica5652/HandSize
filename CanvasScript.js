@@ -10,8 +10,29 @@ var points = new Array(null);
 
 var ZOOM_FACTOR = 2.00;
 
+var instructions = new Array(null);
+
+var instructionCounter = 1;
+
+instructions.push("Upload a photo of your right hand. Make sure that the camera is level!");
+instructions.push("Select the center of the base of your index finger. (The point where the finger meets the hand.)");
+instructions.push("Select the center of the tip of your index finger.");
+instructions.push("Select the base of your ring finger.");
+instructions.push("Select the tip of your ring finger.");
+instructions.push("Here are your results!");
+
+var usageInstructions = "Tap a point on your photo to zoom in on it.";
+usageInstructions += " Use the bar above the zoomed in image to zoom more or less if necessary."
+usageInstructions += " Tap a point on the zoomed in image to draw a dot.";
+usageInstructions += " When you are satisified with the location of the dot, press continue."
+usageInstructions += " You can select a new point on the original image to zoom to a different location.";
+usageInstructions += " You can select a new point on the zoomed in image to draw the dot in a different place.";
+
+
 var setUp = function() {
 	setUpFileUpload();
+	alert(instructions[instructionCounter]);
+	instructionCounter++;
 }
 
 var calculateResult = function() {
@@ -46,6 +67,8 @@ var continueToNextPhase = function() {
 		alert("Please select a point before moving on.");
 		return;
 	}
+	alert(instructions[instructionCounter]);
+	instructionCounter++;
 	if (points.length == 4) {
 		calculateResult();
 	} 
@@ -110,6 +133,9 @@ var setUpZoomCanvas = function(image) {
 
 	zoomCanvas.getContext('2d').save();
 	$('#zoomCanvas').on('click', addPoint);
+	alert(usageInstructions);
+	alert(instructions[instructionCounter]);
+	instructionCounter++;
 }
 
 /*
