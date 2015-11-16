@@ -6,6 +6,8 @@ var click;
 var upperX;
 var upperY;
 
+var upload_url;
+
 var points = new Array(null);
 
 var ZOOM_FACTOR = 2.00;
@@ -29,10 +31,11 @@ usageInstructions += " You can select a new point on the original image to zoom 
 usageInstructions += " You can select a new point on the zoomed in image to draw the dot in a different place.";
 
 
-var setUp = function() {
+var setUp = function(url) {
 	setUpFileUpload();
 	alert(instructions[instructionCounter]);
 	instructionCounter++;
+	upload_url = url;
 }
 
 var calculateResult = function() {
@@ -48,13 +51,28 @@ var displayResults = function(ratio) {
 	clearCurrentPage();
 	var dynamicDiv = $('<div/>', {id: 'dynamicContent'});
 	$('#pageContent').append(dynamicDiv);
+	alert(upload_url);
 
+	var form = $('<form/>', {id: 'form', action: upload_url, method: 'post'});
+	$('#dynamicContent').append(form);
 	for (var a = 0; a < studies.length; a++) {
 		var thisDiv = $('<div/>', {id: studies[a].name});
-		$('#dynamicContent').append(thisDiv);
+		$(form).append(thisDiv);
 		thisDiv = document.getElementById(studies[a].name);
 		thisDiv.innerHTML = studies[a].getDisplayString(ratio);
+		var set = $('<fieldset/>', {id: studies[a].name + "accSet"});
+		var firstButton = $('<input/>', {type: "radio", name: studies[a].id, value: "a"});
+		var secondButton = $('<input/>', {type: "radio", name: studies[a].id, value: "ia"});
+		var thirdButton = $('<input/>', {type: "radio", name: studies[a].id, value: "na", checked:"true"});
+		$(set).append('<br>');
+		$(set).append(firstButton).append("Accurate");
+		$(set).append(secondButton).append("Inaccurate");
+		$(set).append(thirdButton).append("Not Applicable");
+		$('#form').append(set);
+
 	}
+	var submitButton = $('<input/>', {type: 'submit'});
+	$('#form').append(submitButton);
 }
 
 /*
@@ -308,5 +326,3 @@ var setUpFileUpload = function() {
     	handleUpload(input);
     });
 }
-
-window.onload = setUp;

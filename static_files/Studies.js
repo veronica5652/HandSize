@@ -1,8 +1,9 @@
 var studies = new Array();
 
-function Study(name, getDisplayString) {
+function Study(name, getDisplayString, id) {
 	this.name = name;
 	this.getDisplayString = getDisplayString;
+	this.id = id;
 }
 
 /*
@@ -51,7 +52,7 @@ var autismRatio = function(ratio) {
 	}
 	return result;
 }
-studies.push(new Study("The 2nd to 4th digit ratio and autism", autismRatio));
+studies.push(new Study("The 2nd to 4th digit ratio and autism", autismRatio, 1));
 
 /*
  * Heterosexual women: .9675-.975
@@ -71,7 +72,7 @@ var sexuality = function(ratio) {
 	return result;
 }
 
-studies.push(new Study("Finger-length patterns vary with gender, sexual orientation and birth order", sexuality));
+studies.push(new Study("Finger-length patterns vary with gender, sexual orientation and birth order", sexuality, 2));
 
 /*
  * International players/coaches: .935 - .945
@@ -90,7 +91,7 @@ var sports = function(ratio) {
 	return result;
 }
 
-studies.push(new Study("Second to fourth digit ratio and male ability in sport: implications for sexual selection in humans", sports));
+studies.push(new Study("Second to fourth digit ratio and male ability in sport: implications for sexual selection in humans", sports, 3));
 
 /*
  * Aggressive men: < .94
@@ -119,4 +120,4 @@ studies.push(new Study("Second to fourth digit ratio and male ability in sport: 
  	return result;
  }
 
-studies.push(new Study("Finger length ratio (2D:4D) and sex differences in aggression during a simulated war game", aggression));
+studies.push(new Study("Finger length ratio (2D:4D) and sex differences in aggression during a simulated war game", aggression, 4));
