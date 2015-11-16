@@ -60,7 +60,7 @@ var displayResults = function(ratio) {
 		$(form).append(thisDiv);
 		thisDiv = document.getElementById(studies[a].name);
 		thisDiv.innerHTML = studies[a].getDisplayString(ratio);
-		var set = $('<fieldset/>', {id: studies[a].name + "accSet"});
+		var set = $('<fieldset/>', {id: studies[a].id});
 		var firstButton = $('<input/>', {type: "radio", name: studies[a].id, value: "a"});
 		var secondButton = $('<input/>', {type: "radio", name: studies[a].id, value: "ia"});
 		var thirdButton = $('<input/>', {type: "radio", name: studies[a].id, value: "na", checked:"true"});
@@ -274,6 +274,9 @@ var loadImage = function(fileReader) {
 
 var clearCurrentPage = function() {
 	$('#dynamicContent').remove();
+	points = new Array(null);
+	ZOOM_FACTOR = 2.00;
+	instrutionCounter = 1;
 }
 
 /*
